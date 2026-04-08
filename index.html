@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#153b7a">
+  <title>RE+ Leads | VMS Energy</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-512.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="brand-block">
+        <img class="brand-logo" src="assets/img/VMS_Energy_logo_azul.webp" alt="VMS Energy">
+      </div>
+      <div class="event-mark">
+        <img class="event-logo" src="assets/img/RE_Events_orange.webp" alt="RE+ Mexico">
+      </div>
+    </header>
+
+    <main class="content-grid">
+      <section class="intro-card">
+        <div>
+          <p class="eyebrow">Registro en sitio</p>
+          <h1>RE+ Leads</h1>
+          <p class="intro-copy">
+            Energía Solar + Disponibilidad + Ingeniería.
+          </p>
+        </div>
+
+        <div class="status-panel">
+          <div class="status-pill" id="network-status">Verificando conexion...</div>
+          <div class="status-metrics">
+            <article>
+              <span class="metric-label">Leads guardados</span>
+              <strong id="saved-count">0</strong>
+            </article>
+            <article>
+              <span class="metric-label">Pendientes de envio</span>
+              <strong id="pending-count">0</strong>
+            </article>
+          </div>
+          <div class="status-actions">
+            <button type="button" class="ghost-button" id="sync-button">Intentar envio</button>
+            <button type="button" class="ghost-button" id="export-button">Exportar CSV</button>
+            <button type="button" class="ghost-button" id="export-cut-button">Exportar y marcar corte</button>
+            <button type="button" class="ghost-button" id="email-button">Preparar correo</button>
+          </div>
+        </div>
+      </section>
+
+      <form id="lead-form" class="lead-form">
+        <section class="form-card business-card-card">
+          <div class="card-upload-header">
+            <div>
+              <p class="eyebrow">Captura rapida</p>
+              <h2>Tarjeta de presentacion</h2>
+              <p class="card-upload-copy">
+                Sube una foto de la tarjeta para extraer datos y prellenar el formulario automaticamente.
+              </p>
+            </div>
+            <div class="card-upload-actions">
+              <label class="upload-dropzone" for="business-card-image">
+                <input type="file" id="business-card-image" accept="image/*" capture="environment">
+                <span>Seleccionar o tomar foto</span>
+                <small>JPG, PNG o HEIC compatible con tu navegador</small>
+              </label>
+              <button type="button" class="ghost-button" id="scan-card-button">Extraer datos</button>
+            </div>
+          </div>
+
+          <div class="card-upload-grid">
+            <div class="card-preview-shell">
+              <img id="business-card-preview" class="card-preview is-empty" alt="Vista previa de la tarjeta">
+              <p id="card-upload-feedback" class="card-upload-feedback">Sube una imagen clara para iniciar el reconocimiento.</p>
+            </div>
+
+            <div class="ocr-results">
+              <div class="ocr-summary">
+                <h3>Datos detectados</h3>
+                <div id="ocr-detected-fields" class="ocr-chip-list">
+                  <p class="empty-state">Aun no hay datos extraidos.</p>
+                </div>
+              </div>
+              <div class="ocr-proposal">
+                <div class="ocr-proposal-header">
+                  <h3>Revisar propuesta</h3>
+                  <button type="button" class="primary-button" id="apply-ocr-button" disabled>Aplicar al formulario</button>
+                </div>
+                <div class="field-grid two-col" id="ocr-proposal-fields">
+                  <label>
+                    <span class="ocr-field-label"><input type="checkbox" data-ocr-toggle="nombreContacto" disabled>Nombre</span>
+                    <input type="text" id="ocr-nombreContacto" data-ocr-field="nombreContacto" placeholder="Sin propuesta">
+                  </label>
+                  <label>
+                    <span class="ocr-field-label"><input type="checkbox" data-ocr-toggle="cargoContacto" disabled>Cargo</span>
+                    <input type="text" id="ocr-cargoContacto" data-ocr-field="cargoContacto" placeholder="Sin propuesta">
+                  </label>
+                  <label>
+                    <span class="ocr-field-label"><input type="checkbox" data-ocr-toggle="empresa" disabled>Empresa</span>
+                    <input type="text" id="ocr-empresa" data-ocr-field="empresa" placeholder="Sin propuesta">
+                  </label>
+                  <label>
+                    <span class="ocr-field-label"><input type="checkbox" data-ocr-toggle="email" disabled>Email</span>
+                    <input type="text" id="ocr-email" data-ocr-field="email" placeholder="Sin propuesta">
+                  </label>
+                  <label>
+                    <span class="ocr-field-label"><input type="checkbox" data-ocr-toggle="telefono" disabled>Telefono</span>
+                    <input type="text" id="ocr-telefono" data-ocr-field="telefono" placeholder="Sin propuesta">
+                  </label>
+                  <label>
+                    <span class="ocr-field-label"><input type="checkbox" data-ocr-toggle="paisCiudad" disabled>Pais / Ciudad</span>
+                    <input type="text" id="ocr-paisCiudad" data-ocr-field="paisCiudad" placeholder="Sin propuesta">
+                  </label>
+                </div>
+              </div>
+              <section class="ocr-debug">
+                <button type="button" class="ghost-button ocr-debug-toggle" id="toggle-ocr-text" aria-expanded="false">
+                  Mostrar texto detectado
+                </button>
+                <label id="ocr-debug-content" hidden>
+                  <span>Resultado OCR</span>
+                  <textarea id="ocr-text-output" rows="8" readonly placeholder="Aqui apareceran las lineas detectadas en la tarjeta."></textarea>
+                </label>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-card">
+          <h2>Datos generales</h2>
+          <div class="field-grid two-col">
+            <label>
+              <span>Nombre del contacto</span>
+              <input type="text" name="nombreContacto" required>
+            </label>
+            <label>
+              <span>Empresa</span>
+              <input type="text" name="empresa" required>
+            </label>
+            <label>
+              <span>Pais / Ciudad</span>
+              <input type="text" name="paisCiudad" required>
+            </label>
+            <label>
+              <span>Industria</span>
+              <select name="industria" required>
+                <option value="">Selecciona una industria</option>
+                <option>Manufactura</option>
+                <option>Comercial</option>
+                <option>Retail</option>
+                <option>Hospitalidad</option>
+                <option>Salud</option>
+                <option>Logistica</option>
+                <option>Data center</option>
+                <option>Agroindustria</option>
+                <option>Otra</option>
+              </select>
+            </label>
+            <label>
+              <span>Cargo del contacto</span>
+              <input type="text" name="cargoContacto">
+            </label>
+            <label>
+              <span>Email</span>
+              <input type="email" name="email" required>
+            </label>
+            <label>
+              <span>Telefono</span>
+              <input type="tel" name="telefono">
+            </label>
+            <label>
+              <span>Asesor / Equipo</span>
+              <input type="text" name="asesorEquipo" placeholder="Ej. Booth A / Maria">
+            </label>
+          </div>
+        </section>
+
+        <section class="form-card">
+          <h2>Perfil energetico</h2>
+          <div class="field-grid two-col">
+            <label>
+              <span>Consumo mensual promedio (kWh)</span>
+              <input type="number" name="consumoMensual" min="0" step="1">
+            </label>
+            <label>
+              <span>Demanda maxima (kW)</span>
+              <input type="number" name="demandaMaxima" min="0" step="1">
+            </label>
+            <label>
+              <span>Nivel de tension</span>
+              <select name="nivelTension">
+                <option value="">Selecciona una opcion</option>
+                <option>BT</option>
+                <option>MT</option>
+                <option>AT</option>
+              </select>
+            </label>
+          </div>
+
+          <fieldset>
+            <legend>Penalizaciones por demanda</legend>
+            <div class="chip-group">
+              <label class="chip-option"><input type="radio" name="penalizacionesDemanda" value="Si"><span>Si</span></label>
+              <label class="chip-option"><input type="radio" name="penalizacionesDemanda" value="No"><span>No</span></label>
+              <label class="chip-option"><input type="radio" name="penalizacionesDemanda" value="No se"><span>No se</span></label>
+            </div>
+          </fieldset>
+        </section>
+
+        <section class="form-card split-card">
+          <div>
+            <h2>Infraestructura existente</h2>
+            <fieldset>
+              <legend>Tiene planta solar</legend>
+              <div class="checkbox-stack">
+                <label><input type="radio" name="plantaSolar" value="No"><span>No</span></label>
+                <label><input type="radio" name="plantaSolar" value="Si <500 kWp"><span>Si &lt;500 kWp</span></label>
+                <label><input type="radio" name="plantaSolar" value="Si >500 kWp"><span>Si &gt;500 kWp</span></label>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Cuenta con respaldo</legend>
+              <div class="checkbox-stack">
+                <label><input type="checkbox" name="respaldo" value="No"><span>No</span></label>
+                <label><input type="checkbox" name="respaldo" value="DG"><span>DG</span></label>
+                <label><input type="checkbox" name="respaldo" value="UPS"><span>UPS</span></label>
+                <label><input type="checkbox" name="respaldo" value="BESS"><span>BESS</span></label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div>
+            <h2>Interes principal</h2>
+            <div class="checkbox-stack">
+              <label><input type="checkbox" name="interesPrincipal" value="Peak shaving"><span>Peak shaving</span></label>
+              <label><input type="checkbox" name="interesPrincipal" value="Respaldo critico"><span>Respaldo critico</span></label>
+              <label><input type="checkbox" name="interesPrincipal" value="Microgrid"><span>Microgrid</span></label>
+              <label><input type="checkbox" name="interesPrincipal" value="Red limitada"><span>Red limitada</span></label>
+              <label><input type="checkbox" name="interesPrincipal" value="Expansion futura"><span>Expansion futura</span></label>
+            </div>
+
+            <fieldset>
+              <legend>Horizonte de proyecto</legend>
+              <div class="checkbox-stack">
+                <label><input type="radio" name="horizonteProyecto" value="<6 meses"><span>&lt;6 meses</span></label>
+                <label><input type="radio" name="horizonteProyecto" value="6-12 meses"><span>6-12 meses</span></label>
+                <label><input type="radio" name="horizonteProyecto" value="+12 meses"><span>+12 meses</span></label>
+              </div>
+            </fieldset>
+          </div>
+        </section>
+
+        <section class="form-card">
+          <h2>Notas y CTA</h2>
+          <div class="field-grid">
+            <fieldset>
+              <legend>Servicios de interes</legend>
+              <div class="service-toolbar">
+                <label class="service-search">
+                  <span>Buscar servicio</span>
+                  <input type="search" id="service-search" placeholder="Ej. SCADA, mantenimiento, interconexion">
+                </label>
+                <div class="service-toolbar-actions">
+                  <button type="button" class="ghost-button" id="expand-services">Desplegar todo</button>
+                  <button type="button" class="ghost-button" id="collapse-services">Contraer todo</button>
+                </div>
+              </div>
+              <div class="service-groups">
+                <details class="service-group" open>
+                  <summary>Servicios | EPC Solar Industrial</summary>
+                  <div class="checkbox-stack">
+                    <label><input type="checkbox" name="serviciosInteres" value="EPC de plantas fotovoltaicas on-grid"><span>EPC de plantas fotovoltaicas on-grid</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="EPC behind-the-meter (autoconsumo industrial)"><span>EPC behind-the-meter (autoconsumo industrial)</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="EPC solar hibrido (Solar + generacion existente)"><span>EPC solar hibrido (Solar + generacion existente)</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Integracion electrica BT / MT / AT"><span>Integracion electrica BT / MT / AT</span></label>
+                  </div>
+                </details>
+
+                <details class="service-group">
+                  <summary>Servicios | Subestaciones</summary>
+                  <div class="checkbox-stack">
+                    <label><input type="checkbox" name="serviciosInteres" value="Integracion electrica y de potencia"><span>Integracion electrica y de potencia</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Centros de carga solares"><span>Centros de carga solares</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Tableros BT/MT para plantas FV"><span>Tableros BT/MT para plantas FV</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Transformadores elevadores"><span>Transformadores elevadores</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Sistemas de proteccion y seccionamiento"><span>Sistemas de proteccion y seccionamiento</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Evacuacion de potencia a red interna o CFE"><span>Evacuacion de potencia a red interna o CFE</span></label>
+                  </div>
+                </details>
+
+                <details class="service-group">
+                  <summary>Servicios | Interconexion y puesta en servicio</summary>
+                  <div class="checkbox-stack">
+                    <label><input type="checkbox" name="serviciosInteres" value="Pruebas electricas de sistemas FV"><span>Pruebas electricas de sistemas FV</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Pruebas de protecciones"><span>Pruebas de protecciones</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Puesta en marcha de inversores"><span>Puesta en marcha de inversores</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Arranque operativo y aceptacion final"><span>Arranque operativo y aceptacion final</span></label>
+                  </div>
+                </details>
+
+                <details class="service-group">
+                  <summary>Servicios | Automatizacion y monitoreo</summary>
+                  <div class="checkbox-stack">
+                    <label><input type="checkbox" name="serviciosInteres" value="Integracion a SCADA / EMS"><span>Integracion a SCADA / EMS</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Monitoreo de generacion y consumo"><span>Monitoreo de generacion y consumo</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Visualizacion energetica en tiempo real"><span>Visualizacion energetica en tiempo real</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Alarmas y reportes operativos"><span>Alarmas y reportes operativos</span></label>
+                  </div>
+                </details>
+
+                <details class="service-group">
+                  <summary>Mantenimiento | Optimizacion de desempeño</summary>
+                  <div class="checkbox-stack">
+                    <label><input type="checkbox" name="serviciosInteres" value="Optimizacion de desempeño"><span>Optimizacion de desempeño</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Analisis de perdidas electricas"><span>Analisis de perdidas electricas</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Deteccion de degradacion prematura"><span>Deteccion de degradacion prematura</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Ajustes operativos para mejora de generacion"><span>Ajustes operativos para mejora de generacion</span></label>
+                  </div>
+                </details>
+
+                <details class="service-group">
+                  <summary>Mantenimiento | Cumplimiento y continuidad</summary>
+                  <div class="checkbox-stack">
+                    <label><input type="checkbox" name="serviciosInteres" value="Verificacion normativa (NOM / IEC)"><span>Verificacion normativa (NOM / IEC)</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Reportes para auditorias energeticas"><span>Reportes para auditorias energeticas</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Soporte a ISO 50001"><span>Soporte a ISO 50001</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Planes de confiabilidad energetica"><span>Planes de confiabilidad energetica</span></label>
+                  </div>
+                </details>
+
+                <details class="service-group">
+                  <summary>Mantenimiento Preventivo</summary>
+                  <div class="checkbox-stack">
+                    <label><input type="checkbox" name="serviciosInteres" value="Inspeccion electrica DC/AC"><span>Inspeccion electrica DC/AC</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Revision de inversores"><span>Revision de inversores</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Termografia en tableros y conexiones"><span>Termografia en tableros y conexiones</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Verificacion de protecciones"><span>Verificacion de protecciones</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Limpieza tecnica de modulos"><span>Limpieza tecnica de modulos</span></label>
+                  </div>
+                </details>
+
+                <details class="service-group">
+                  <summary>Mantenimiento Correctivo</summary>
+                  <div class="checkbox-stack">
+                    <label><input type="checkbox" name="serviciosInteres" value="Diagnostico de fallas electricas"><span>Diagnostico de fallas electricas</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Sustitucion de inversores y componentes"><span>Sustitucion de inversores y componentes</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Correccion de puntos calientes"><span>Correccion de puntos calientes</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Ajuste de protecciones"><span>Ajuste de protecciones</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Reparacion de cableado DC/AC"><span>Reparacion de cableado DC/AC</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Verificacion de niveles (lux)"><span>Verificacion de niveles (lux)</span></label>
+                  </div>
+                </details>
+
+                <details class="service-group">
+                  <summary>Ingenieria | Factibilidad solar</summary>
+                  <div class="checkbox-stack">
+                    <label><input type="checkbox" name="serviciosInteres" value="Evaluacion tecnica y electrica"><span>Evaluacion tecnica y electrica</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Analisis de capacidad instalada"><span>Analisis de capacidad instalada</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Estudios de compatibilidad con infraestructura existente"><span>Estudios de compatibilidad con infraestructura existente</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Estudios de interconexion (CFE / CRE)"><span>Estudios de interconexion (CFE / CRE)</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Analisis de riesgos tecnicos"><span>Analisis de riesgos tecnicos</span></label>
+                  </div>
+                </details>
+
+                <details class="service-group">
+                  <summary>Ingenieria electrica solar</summary>
+                  <div class="checkbox-stack">
+                    <label><input type="checkbox" name="serviciosInteres" value="Ingenieria basica y de detalle"><span>Ingenieria basica y de detalle</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Diagramas unifilares DC / AC"><span>Diagramas unifilares DC / AC</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Ingenieria de protecciones"><span>Ingenieria de protecciones</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Ingenieria de puesta a tierra"><span>Ingenieria de puesta a tierra</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Seleccion tecnica de equipos"><span>Seleccion tecnica de equipos</span></label>
+                  </div>
+                </details>
+
+                <details class="service-group">
+                  <summary>Estudios electricos especializados</summary>
+                  <div class="checkbox-stack">
+                    <label><input type="checkbox" name="serviciosInteres" value="Cortocircuito"><span>Cortocircuito</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Coordinacion de protecciones"><span>Coordinacion de protecciones</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Arco electrico"><span>Arco electrico</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Flujo de carga"><span>Flujo de carga</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Calidad de energia"><span>Calidad de energia</span></label>
+                  </div>
+                </details>
+
+                <details class="service-group">
+                  <summary>Ingenieria de interconexion</summary>
+                  <div class="checkbox-stack">
+                    <label><input type="checkbox" name="serviciosInteres" value="Estudios de impacto a red"><span>Estudios de impacto a red</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Memorias tecnicas para CFE / utility"><span>Memorias tecnicas para CFE / utility</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Integracion BT / MT / AT"><span>Integracion BT / MT / AT</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Ingenieria de subestacion solar"><span>Ingenieria de subestacion solar</span></label>
+                  </div>
+                </details>
+
+                <details class="service-group">
+                  <summary>Ingenieria de eficiencia energetica</summary>
+                  <div class="checkbox-stack">
+                    <label><input type="checkbox" name="serviciosInteres" value="Analisis de consumo vs generacion"><span>Analisis de consumo vs generacion</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Memorias tecnicas para CFE / utility - eficiencia energetica"><span>Memorias tecnicas para CFE / utility</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Integracion con ISO 50001"><span>Integracion con ISO 50001</span></label>
+                    <label><input type="checkbox" name="serviciosInteres" value="Optimizacion energetica integral"><span>Optimizacion energetica integral</span></label>
+                  </div>
+                </details>
+              </div>
+            </fieldset>
+            <label>
+              <span>Notas del asesor</span>
+              <textarea name="notas" rows="4" placeholder="Contexto adicional, necesidades especiales o comentarios del booth..."></textarea>
+            </label>
+            <label class="cta-toggle">
+              <input type="checkbox" name="ctaEvaluacion" checked>
+              <span>Solicitar evaluacion tecnica Solar + BESS</span>
+            </label>
+          </div>
+        </section>
+
+        <footer class="form-footer">
+          <p id="form-feedback" class="form-feedback">Listo para capturar.</p>
+          <div class="footer-actions">
+            <button type="reset" class="secondary-button">Limpiar</button>
+            <button type="submit" class="primary-button">Guardar lead</button>
+          </div>
+        </footer>
+      </form>
+
+      <section class="queue-card">
+        <div class="queue-header">
+          <div>
+            <p class="eyebrow">Operacion offline</p>
+            <h2>Cola local de leads</h2>
+          </div>
+          <button type="button" class="ghost-button" id="clear-button">Limpiar enviados</button>
+        </div>
+        <div id="lead-list" class="lead-list">
+          <p class="empty-state">Todavia no hay registros.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="review-dialog" class="review-dialog">
+    <form method="dialog" class="review-card">
+      <div class="review-header">
+        <div>
+          <p class="eyebrow">Revision final</p>
+          <h2>Confirmar lead antes de guardar</h2>
+        </div>
+        <button type="button" class="ghost-button" id="close-review">Cerrar</button>
+      </div>
+      <div id="review-content" class="review-content"></div>
+      <div class="review-actions">
+        <button type="button" class="secondary-button" id="edit-review">Seguir editando</button>
+        <button type="button" class="primary-button" id="confirm-save">Confirmar y guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
