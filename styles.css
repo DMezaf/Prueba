@@ -384,6 +384,10 @@ h1 {
   gap: 16px;
 }
 
+.full-span {
+  grid-column: 1 / -1;
+}
+
 .service-groups {
   display: grid;
   gap: 18px;
@@ -414,6 +418,10 @@ h1 {
 }
 
 .service-group.is-hidden {
+  display: none;
+}
+
+[data-visible-for].is-hidden {
   display: none;
 }
 
@@ -734,6 +742,10 @@ fieldset {
   .review-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .full-span {
+    grid-column: auto;
   }
 
   .ocr-proposal-header {

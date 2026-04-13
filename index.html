@@ -131,6 +131,23 @@
         </section>
 
         <section class="form-card">
+          <h2>Tipo de registro</h2>
+          <fieldset>
+            <legend>Selecciona el flujo a capturar</legend>
+            <div class="chip-group">
+              <label class="chip-option">
+                <input type="radio" name="tipoRegistro" value="lead" checked>
+                <span>Lead / cliente</span>
+              </label>
+              <label class="chip-option">
+                <input type="radio" name="tipoRegistro" value="proveedor">
+                <span>Proveedor</span>
+              </label>
+            </div>
+          </fieldset>
+        </section>
+
+        <section class="form-card">
           <h2>Datos generales</h2>
           <div class="field-grid two-col">
             <label>
@@ -145,9 +162,9 @@
               <span>Pais / Ciudad</span>
               <input type="text" name="paisCiudad" required>
             </label>
-            <label>
+            <label class="lead-only" data-visible-for="lead">
               <span>Industria</span>
-              <select name="industria" required>
+              <select name="industria" data-required-for="lead">
                 <option value="">Selecciona una industria</option>
                 <option>Manufactura</option>
                 <option>Comercial</option>
@@ -179,7 +196,7 @@
           </div>
         </section>
 
-        <section class="form-card">
+        <section class="form-card lead-only" data-visible-for="lead">
           <h2>Perfil energetico</h2>
           <div class="field-grid two-col">
             <label>
@@ -211,7 +228,52 @@
           </fieldset>
         </section>
 
-        <section class="form-card split-card">
+        <section class="form-card provider-only" data-visible-for="proveedor">
+          <h2>Datos del proveedor</h2>
+          <div class="field-grid two-col">
+            <label>
+              <span>Categoria del proveedor</span>
+              <select name="categoriaProveedor" data-required-for="proveedor">
+                <option value="">Selecciona una categoria</option>
+                <option>Fabricante</option>
+                <option>Distribuidor</option>
+                <option>Integrador</option>
+                <option>Contratista / instalador</option>
+                <option>Ingenieria / consultoria</option>
+                <option>O&M / servicios</option>
+                <option>Software / monitoreo</option>
+                <option>Logistica</option>
+                <option>Financiamiento</option>
+                <option>Otro</option>
+              </select>
+            </label>
+            <label>
+              <span>Tipo de relacion buscada</span>
+              <select name="tipoRelacionProveedor">
+                <option value="">Selecciona una opcion</option>
+                <option>Compra</option>
+                <option>Representacion</option>
+                <option>Alianza comercial</option>
+                <option>Servicio especializado</option>
+                <option>Evaluacion futura</option>
+              </select>
+            </label>
+            <label>
+              <span>Cobertura geografica</span>
+              <input type="text" name="coberturaGeografica" placeholder="Ej. Mexico, LATAM, Norte">
+            </label>
+            <label>
+              <span>Marcas o lineas que representa</span>
+              <input type="text" name="marcasRepresentadas" placeholder="Ej. inversores, tableros, SCADA">
+            </label>
+            <label class="full-span">
+              <span>Productos o servicios que ofrece</span>
+              <textarea name="productosServiciosProveedor" rows="4" placeholder="Describe brevemente lo que suministra o resuelve..."></textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="form-card split-card lead-only" data-visible-for="lead">
           <div>
             <h2>Infraestructura existente</h2>
             <fieldset>
@@ -258,7 +320,7 @@
         <section class="form-card">
           <h2>Notas y CTA</h2>
           <div class="field-grid">
-            <fieldset>
+            <fieldset class="lead-only" data-visible-for="lead">
               <legend>Servicios de interes</legend>
               <div class="service-toolbar">
                 <label class="service-search">
@@ -414,7 +476,7 @@
               <span>Notas del asesor</span>
               <textarea name="notas" rows="4" placeholder="Contexto adicional, necesidades especiales o comentarios del booth..."></textarea>
             </label>
-            <label class="cta-toggle">
+            <label class="cta-toggle lead-only" data-visible-for="lead">
               <input type="checkbox" name="ctaEvaluacion" checked>
               <span>Solicitar evaluacion tecnica Solar + BESS</span>
             </label>
@@ -434,7 +496,7 @@
         <div class="queue-header">
           <div>
             <p class="eyebrow">Operacion offline</p>
-            <h2>Cola local de leads</h2>
+          <h2>Cola local de registros</h2>
           </div>
           <button type="button" class="ghost-button" id="clear-button">Limpiar enviados</button>
         </div>
@@ -450,7 +512,7 @@
       <div class="review-header">
         <div>
           <p class="eyebrow">Revision final</p>
-          <h2>Confirmar lead antes de guardar</h2>
+          <h2>Confirmar registro antes de guardar</h2>
         </div>
         <button type="button" class="ghost-button" id="close-review">Cerrar</button>
       </div>

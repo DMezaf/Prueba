@@ -16,6 +16,9 @@ const serviceSearch = document.querySelector("#service-search");
 const expandServicesButton = document.querySelector("#expand-services");
 const collapseServicesButton = document.querySelector("#collapse-services");
 const serviceGroups = Array.from(document.querySelectorAll(".service-group"));
+const recordTypeInputs = Array.from(document.querySelectorAll('input[name="tipoRegistro"]'));
+const conditionalSections = Array.from(document.querySelectorAll("[data-visible-for]"));
+const conditionalRequiredFields = Array.from(document.querySelectorAll("[data-required-for]"));
 const businessCardInput = document.querySelector("#business-card-image");
 const businessCardPreview = document.querySelector("#business-card-preview");
 const cardUploadFeedback = document.querySelector("#card-upload-feedback");
@@ -70,9 +73,11 @@ function setLeads(leads) {
 
 function getFormValues(formElement) {
   const data = new FormData(formElement);
+  const tipoRegistro = data.get("tipoRegistro")?.toString().trim() || "lead";
   return {
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
+    tipoRegistro,
     nombreContacto: data.get("nombreContacto")?.toString().trim() || "",
     empresa: data.get("empresa")?.toString().trim() || "",
     paisCiudad: data.get("paisCiudad")?.toString().trim() || "",
@@ -90,6 +95,11 @@ function getFormValues(formElement) {
     interesPrincipal: data.getAll("interesPrincipal"),
     serviciosInteres: data.getAll("serviciosInteres"),
     horizonteProyecto: data.get("horizonteProyecto")?.toString().trim() || "",
+    categoriaProveedor: data.get("categoriaProveedor")?.toString().trim() || "",
+    tipoRelacionProveedor: data.get("tipoRelacionProveedor")?.toString().trim() || "",
+    coberturaGeografica: data.get("coberturaGeografica")?.toString().trim() || "",
+    marcasRepresentadas: data.get("marcasRepresentadas")?.toString().trim() || "",
+    productosServiciosProveedor: data.get("productosServiciosProveedor")?.toString().trim() || "",
     notas: data.get("notas")?.toString().trim() || "",
     ctaEvaluacion: data.get("ctaEvaluacion") === "on",
     syncStatus: "pending",
@@ -131,7 +141,14 @@ function renderLeads() {
   leadList.innerHTML = leads.map((lead) => {
     const statusClass = lead.syncStatus === "sent" ? "sent" : "pending";
     const statusLabel = lead.syncStatus === "sent" ? "Enviado" : "Pendiente";
-    const interest = lead.interesPrincipal.length ? lead.interesPrincipal.join(", ") : "Sin definir";
+    const isProvider = lead.tipoRegistro === "proveedor";
+    const interest = isProvider
+      ? (lead.categoriaProveedor || "Proveedor sin categoria")
+      : (lead.interesPrincipal.length ? lead.interesPrincipal.join(", ") : "Sin definir");
+    const typeLabel = isProvider ? "Proveedor" : "Lead";
+    const secondaryTag = isProvider
+      ? (lead.tipoRelacionProveedor || "Sin relacion")
+      : (lead.horizonteProyecto || "Sin horizonte");
     return `
       <article class="lead-item">
         <header>
@@ -140,12 +157,13 @@ function renderLeads() {
             <p class="lead-meta">${escapeHtml(lead.paisCiudad || "Ubicacion no capturada")} | ${escapeHtml(lead.email || "Sin email")}</p>
           </div>
           <div class="lead-tags">
+            <span class="tag">${typeLabel}</span>
             <span class="tag ${statusClass}">${statusLabel}</span>
-            <span class="tag">${escapeHtml(lead.horizonteProyecto || "Sin horizonte")}</span>
+            <span class="tag">${escapeHtml(secondaryTag)}</span>
           </div>
         </header>
         <p class="lead-meta">Capturado: ${formatDate(lead.createdAt)}</p>
-        <p><strong>Interes:</strong> ${escapeHtml(interest)}</p>
+        <p><strong>${isProvider ? "Categoria" : "Interes"}:</strong> ${escapeHtml(interest)}</p>
       </article>
     `;
   }).join("");
@@ -231,7 +249,7 @@ async function syncPendingLeads() {
 
   setLeads(leads);
   renderLeads();
-  setFeedback(`Sincronizacion terminada. ${sentCount} lead(s) enviados.`, "success");
+  setFeedback(`Sincronizacion terminada. ${sentCount} registro(s) enviados.`, "success");
 }
 
 function toCsvValue(value) {
@@ -244,6 +262,7 @@ function getCsvHeaders() {
   return [
     "id",
     "createdAt",
+    "tipoRegistro",
     "nombreContacto",
     "empresa",
     "paisCiudad",
@@ -261,6 +280,11 @@ function getCsvHeaders() {
     "interesPrincipal",
     "serviciosInteres",
     "horizonteProyecto",
+    "categoriaProveedor",
+    "tipoRelacionProveedor",
+    "coberturaGeografica",
+    "marcasRepresentadas",
+    "productosServiciosProveedor",
     "notas",
     "ctaEvaluacion",
     "syncStatus",
@@ -1133,6 +1157,39 @@ function clearSentLeads() {
   setFeedback("Se limpiaron los registros ya enviados.", "success");
 }
 
+function getCurrentRecordType() {
+  return form.elements.namedItem("tipoRegistro")?.value || "lead";
+}
+
+function setSectionAvailability(section, shouldShow) {
+  section.classList.toggle("is-hidden", !shouldShow);
+  section.querySelectorAll("input, select, textarea, button").forEach((field) => {
+    if (field.name === "tipoRegistro") {
+      return;
+    }
+
+    field.disabled = !shouldShow;
+  });
+}
+
+function applyRecordType(type = "lead") {
+  conditionalSections.forEach((section) => {
+    setSectionAvailability(section, section.dataset.visibleFor === type);
+  });
+
+  conditionalRequiredFields.forEach((field) => {
+    field.required = field.dataset.requiredFor === type;
+  });
+
+  if (type !== "lead") {
+    serviceSearch.value = "";
+    serviceGroups.forEach((group, index) => {
+      group.classList.remove("is-hidden");
+      group.open = index === 0;
+    });
+  }
+}
+
 function formatValue(value) {
   if (Array.isArray(value)) {
     return value.length ? value.join(", ") : "Sin definir";
@@ -1162,35 +1219,53 @@ function renderReviewSection(title, items) {
 }
 
 function openReviewDialog(lead) {
-  reviewContent.innerHTML = [
+  const isProvider = lead.tipoRegistro === "proveedor";
+  const sections = [
     renderReviewSection("Datos generales", [
+      { label: "Tipo de registro", value: isProvider ? "Proveedor" : "Lead / cliente" },
       { label: "Nombre del contacto", value: lead.nombreContacto },
       { label: "Empresa", value: lead.empresa },
       { label: "Pais / Ciudad", value: lead.paisCiudad },
-      { label: "Industria", value: lead.industria },
       { label: "Cargo", value: lead.cargoContacto },
       { label: "Email", value: lead.email },
       { label: "Telefono", value: lead.telefono },
       { label: "Asesor / Equipo", value: lead.asesorEquipo }
-    ]),
-    renderReviewSection("Perfil energetico", [
-      { label: "Consumo mensual", value: lead.consumoMensual ? `${lead.consumoMensual} kWh` : "" },
-      { label: "Demanda maxima", value: lead.demandaMaxima ? `${lead.demandaMaxima} kW` : "" },
-      { label: "Nivel de tension", value: lead.nivelTension },
-      { label: "Penalizaciones por demanda", value: lead.penalizacionesDemanda }
-    ]),
-    renderReviewSection("Infraestructura e interes", [
-      { label: "Planta solar", value: lead.plantaSolar },
-      { label: "Respaldo", value: lead.respaldo },
-      { label: "Interes principal", value: lead.interesPrincipal },
-      { label: "Horizonte de proyecto", value: lead.horizonteProyecto }
-    ]),
-    renderReviewSection("Servicios y CTA", [
-      { label: "Servicios de interes", value: lead.serviciosInteres },
-      { label: "Evaluacion tecnica Solar + BESS", value: lead.ctaEvaluacion },
-      { label: "Notas", value: lead.notas }
     ])
-  ].join("");
+  ];
+
+  if (isProvider) {
+    sections.push(renderReviewSection("Proveedor", [
+      { label: "Categoria", value: lead.categoriaProveedor },
+      { label: "Tipo de relacion", value: lead.tipoRelacionProveedor },
+      { label: "Cobertura geografica", value: lead.coberturaGeografica },
+      { label: "Marcas o lineas", value: lead.marcasRepresentadas },
+      { label: "Productos o servicios", value: lead.productosServiciosProveedor },
+      { label: "Notas", value: lead.notas }
+    ]));
+  } else {
+    sections.push(
+      renderReviewSection("Perfil energetico", [
+        { label: "Industria", value: lead.industria },
+        { label: "Consumo mensual", value: lead.consumoMensual ? `${lead.consumoMensual} kWh` : "" },
+        { label: "Demanda maxima", value: lead.demandaMaxima ? `${lead.demandaMaxima} kW` : "" },
+        { label: "Nivel de tension", value: lead.nivelTension },
+        { label: "Penalizaciones por demanda", value: lead.penalizacionesDemanda }
+      ]),
+      renderReviewSection("Infraestructura e interes", [
+        { label: "Planta solar", value: lead.plantaSolar },
+        { label: "Respaldo", value: lead.respaldo },
+        { label: "Interes principal", value: lead.interesPrincipal },
+        { label: "Horizonte de proyecto", value: lead.horizonteProyecto }
+      ]),
+      renderReviewSection("Servicios y CTA", [
+        { label: "Servicios de interes", value: lead.serviciosInteres },
+        { label: "Evaluacion tecnica Solar + BESS", value: lead.ctaEvaluacion },
+        { label: "Notas", value: lead.notas }
+      ])
+    );
+  }
+
+  reviewContent.innerHTML = sections.join("");
 
   reviewDialog.showModal();
 }
@@ -1205,12 +1280,14 @@ async function persistLead(lead) {
   await updateBusinessCardPreview(null);
   leadDraft = null;
   form.elements.namedItem("ctaEvaluacion").checked = true;
+  form.elements.namedItem("tipoRegistro").value = "lead";
+  applyRecordType("lead");
   serviceGroups.forEach((group, index) => {
     group.open = index === 0;
     group.classList.remove("is-hidden");
   });
   serviceSearch.value = "";
-  setFeedback("Lead guardado localmente. No se pierde aunque falle la red.", "success");
+  setFeedback("Registro guardado localmente. No se pierde aunque falle la red.", "success");
 
   if (navigator.onLine && WEBHOOK_URL) {
     await syncPendingLeads();
@@ -1255,8 +1332,14 @@ ocrProposalInputs.forEach((input) => {
   });
 });
 setOcrDebugVisibility(false);
+recordTypeInputs.forEach((input) => {
+  input.addEventListener("change", () => {
+    applyRecordType(input.value);
+  });
+});
 form.addEventListener("reset", () => {
   window.setTimeout(() => {
+    applyRecordType("lead");
     businessCardInput.value = "";
     updateBusinessCardPreview(null).catch(() => {});
   }, 0);
@@ -1310,5 +1393,6 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+applyRecordType(getCurrentRecordType());
 updateNetworkStatus();
 renderLeads();
