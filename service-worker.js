@@ -1,4 +1,4 @@
-const CACHE_NAME = "replus-leads-cache-v3";
+const CACHE_NAME = "replus-leads-cache-v4";
 const APP_ASSETS = [
   "./",
   "./index.html",

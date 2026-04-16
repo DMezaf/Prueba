@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruleta VMS Energy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600;700;800&family=Sora:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page-shell">
+    <nav class="back-nav">
+      <a href="../index.html" class="back-link">&larr; Volver a RE+ Leads</a>
+    </nav>
+    <section class="panel social-panel social-panel--hero">
+      <div class="social-brand">
+        <div class="social-logos">
+          <img class="social-logo" src="assets/img/VMS%20Energy%20logo%20Azul2.png" alt="VMS Energy">
+          <img class="social-logo social-logo--secondary" src="assets/img/RE_Events_orange.webp" alt="RE Events">
+        </div>
+        <div class="panel-head">
+          <h3>Gana una oportunidad</h3>
+          <p>Escanea estos QR para seguir a VMS Energy en redes sociales.</p>
+        </div>
+      </div>
+      <div class="qr-grid">
+        <a class="qr-card" href="#" aria-label="Instagram de VMS Energy">
+          <img class="qr-image" src="assets/img/QR-VMS%20instagram.png" alt="QR de Instagram de VMS Energy">
+          <strong>Instagram</strong>
+          <span>@vmsenergy</span>
+        </a>
+        <a class="qr-card" href="#" aria-label="Facebook de VMS Energy">
+          <img class="qr-image" src="assets/img/QR-VMS%20Facebook.png" alt="QR de Facebook de VMS Energy">
+          <strong>Facebook</strong>
+          <span>/vmsenergy</span>
+        </a>
+        <a class="qr-card" href="#" aria-label="LinkedIn de VMS Energy">
+          <img class="qr-image" src="assets/img/qr-VMS%20LinkedIn.png" alt="QR de LinkedIn de VMS Energy">
+          <strong>LinkedIn</strong>
+          <span>VMS Energy</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="hero-card">
+      <div class="hero-copy">
+        <img class="brand-logo" src="assets/img/VMS%20Energy%20logo%20Azul2.png" alt="VMS Energy">
+        <p class="eyebrow">Dinámica promocional</p>
+        <h1>Gira la ruleta y descubre tu regalo</h1>
+        <p class="lead">
+          Participa para ganar uno de los premios disponibles.
+          escaneando los QR de redes sociales.
+        </p>
+        <div class="inventory-pill" id="inventorySummary">Cargando premios disponibles...</div>
+      </div>
+
+      <div class="wheel-panel">
+        <div class="wheel-wrap">
+          <div class="wheel-pointer" aria-hidden="true"></div>
+          <div class="wheel" id="wheel" aria-label="Ruleta de premios"></div>
+          <button class="spin-button" id="spinButton" type="button">Girar ahora</button>
+        </div>
+        <div class="result-card" id="resultCard" aria-live="polite">
+          <p class="result-label">Resultado</p>
+          <div class="result-media" id="resultMedia" hidden>
+            <img id="resultImage" alt="">
+          </div>
+          <h2 id="resultTitle">Tu suerte te espera</h2>
+          <p id="resultText">Haz girar la ruleta para conocer tu premio.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="details-grid">
+      <article class="panel">
+        <div class="panel-head">
+          <h3>Premios de la ruleta</h3>
+          <p>Inventario configurado para la dinámica.</p>
+        </div>
+        <ul class="prize-list" id="prizeList"></ul>
+      </article>
+
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

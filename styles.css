@@ -57,6 +57,8 @@ textarea {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
   padding: 26px 32px;
   border-radius: 28px;
 }
@@ -90,6 +92,28 @@ textarea {
   width: clamp(160px, 18vw, 260px);
   height: auto;
   object-fit: contain;
+}
+
+.sorteo-link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 12px 22px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), #e06600);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 140ms ease, box-shadow 140ms ease;
+  box-shadow: 0 4px 14px rgba(255, 123, 28, 0.35);
+}
+
+.sorteo-link-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 123, 28, 0.45);
 }
 
 .content-grid {
